@@ -5,7 +5,7 @@ var CronJob = require("cron").CronJob;
 const cheerio = require("react-native-cheerio");
 const token = "7419413997:AAEcqfdMPytFfxkDchJxSmW3dzimTozrSo4";
 const bot = new Telegraf(token);
-
+const qs = require("querystring");
 let userInputs = {};
 
 bot.start((ctx) => {

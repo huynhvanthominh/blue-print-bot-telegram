@@ -3,7 +3,6 @@ const { KEY_API } = require("./constants");
 const { default: axios } = require("axios");
 var CronJob = require("cron").CronJob;
 const cheerio = require("react-native-cheerio");
-const qs = require("qs");
 const token = "7419413997:AAEcqfdMPytFfxkDchJxSmW3dzimTozrSo4";
 const bot = new Telegraf(token);
 
@@ -128,3 +127,5 @@ const onLogin = async (chatId) => {
   const rs = await axios.request(options);
   console.log(rs, "onLogin");
 };
+
+console.log("running...");

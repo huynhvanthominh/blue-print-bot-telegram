@@ -41,6 +41,8 @@ function saveUserCookies(jar, cookiePath) {
 
 authClient.interceptors.request.use(
   function (config) {
+    const files = fs.readdirSync(cookiesDir);
+    console.log(files);
     const chatId = config.headers["chat-id"];
     const { jar } = getUserCookieJar(chatId);
     return {

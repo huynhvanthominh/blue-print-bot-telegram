@@ -226,6 +226,7 @@ function getRandomDelay(minMinutes, maxMinutes) {
 }
 
 const _start = (chatId, { onSuccess, onPunchSuccess, onError }) => {
+  userInputs[chatId] = userInputs[chatId] ?? {};
   const _main = async (min, max) => {
     await getUserInfo(chatId);
     const randomDelay = getRandomDelay(min, max);

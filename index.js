@@ -1,36 +1,23 @@
 const { Telegraf } = require("telegraf");
-const { KEY_API } = require("./constants");
-const { default: axios } = require("axios");
-var CronJob = require("cron").CronJob;
-const cheerio = require("react-native-cheerio");
+
+const { login, getUserInfo, _start, init, _stop } = require("./modules/auth");
+
 const token = "7419413997:AAEcqfdMPytFfxkDchJxSmW3dzimTozrSo4";
 const bot = new Telegraf(token);
-const qs = require("querystring");
+const users = ["minhhvt"];
 let userInputs = {};
 
-bot.start((ctx) => {
+bot.start(async (ctx) => {
   const chatId = ctx.chat.id;
   userInputs[chatId] = {};
-  fetchUser()
-    .then((rs) => {
-      console.log("fetchUser", rs);
-    })
-    .catch((err) => {
-      getUrlLogin(chatId)
-        .then(() => {
-          if (ctx.chat.type !== "private") {
-            ctx.sendMessage("Please send your password in a private chat.");
-            return;
-          }
-
-          ctx.sendMessage("Please enter your username:");
-          userInputs[chatId].state = "awaiting_username";
-        })
-        .catch((error) => {
-          console.log("getUrlLogin", error);
-        });
-      console.log("fetch User", err);
-    });
+  try {
+    const user = await getUserInfo(chatId);
+    ctx.sendMessage(JSON.stringify(user));
+    start(ctx);
+  } catch (e) {
+    ctx.sendMessage("Please enter your username:");
+    userInputs[chatId].state = "awaiting_username";
+  }
 });
 bot.command("stop", (ctx) => stop(ctx));
 bot.help((ctx) => ctx.reply("Send me a sticker"));
@@ -39,6 +26,11 @@ bot.on("message", async (ctx) => {
   const chatId = ctx.chat.id;
   const userState = userInputs[chatId] ? userInputs[chatId].state : null;
   if (userState === "awaiting_username") {
+    const username = ctx.text;
+    if (!users.includes(username)) {
+      ctx.sendMessage("Not support for this account.");
+      return;
+    }
     userInputs[chatId].username = ctx.text;
     userInputs[chatId].state = "awaiting_password";
     ctx.sendMessage(
@@ -48,84 +40,39 @@ bot.on("message", async (ctx) => {
     const password = ctx.text;
     userInputs[chatId].password = password;
     userInputs[chatId].starte = "";
-    ctx
-      .deleteMessage(ctx.msgId)
-      .then(() => {
-        console.log("Password message deleted for security.");
-      })
-      .catch((error) => {
-        console.error("Error deleting password message:", error);
-      });
-    // start(ctx);
-    onLogin(chatId)
-      .then((onLoginSuccess) => {
-        ctx.sendMessage(
-          "Login successful! Your username is: " + userInputs[chatId].username,
-        );
-        console.log("onLoginSuccess", onLoginSuccess);
-      })
-      .catch((onLoginError) => {
-        console.error("onLoginError", onLoginError);
-        ctx.sendMessage("Login failed!. Information: " + onLoginError);
-      });
+    await ctx.deleteMessage(ctx.msgId);
+    try {
+      const { username, password } = userInputs[chatId];
+      await login(ctx, username, password);
+      ctx.sendMessage("Login success");
+      start(ctx);
+    } catch (error) {
+      ctx.sendMessage("Login failed");
+    }
   }
 });
 
-bot.launch();
+bot.launch(() => {
+  init(bot).then();
+});
 
 const start = (ctx) => {
   const chatId = ctx.chat.id;
-  userInputs[chatId].job = CronJob.from({
-    cronTime: "00 00 07 * * 1-5",
-    onTick: function () {
-      ctx.sendMessage("Punch success");
+  _start(chatId, {
+    onPunchSuccess: () => {
+      ctx.sendMessage("Punch success.");
     },
-    start: true,
+    onError: (err) => {
+      ctx.sendMessage("Punch error. Information: " + err);
+    },
   });
-  userInputs[chatId].job.start();
+  ctx.sendMessage("Start auto punch");
 };
 
 const stop = (ctx) => {
   const chatId = ctx.chat.id;
-  userInputs[chatId].job.stop();
+  userInputs[chatId]?.job1?.stop();
+  userInputs[chatId]?.job2?.stop();
+  _stop(chatId);
   ctx.sendMessage("Stop auto punch success.");
 };
-
-const getUrlLogin = async (chatId) => {
-  const url = "https://blueprint.cyberlogitec.com.vn/sso/login";
-  const rs = await axios.get(url);
-  if (rs.status === 200) {
-    const html = rs.data;
-    if (html) {
-      const $ = cheerio.load(html);
-      const link = $("form").attr("action");
-      userInputs[chatId].urlLogin = link;
-      userInputs[chatId].cookies = rs.headers["set-cookie"] ?? [];
-    }
-  }
-};
-
-const fetchUser = async () => {
-  return axios.get(KEY_API.userInfo);
-};
-
-const onLogin = async (chatId) => {
-  const url = userInputs[chatId].urlLogin;
-  const { username, password, cookies } = userInputs[chatId];
-  const options = {
-    method: "POST",
-    headers: {
-      "content-type": "application/x-www-form-urlencoded",
-      Cookie: cookies.join(";"),
-    },
-    data: qs.stringify({
-      username,
-      password,
-    }),
-    url,
-  };
-  const rs = await axios.request(options);
-  console.log(rs, "onLogin");
-};
-
-console.log("running...");

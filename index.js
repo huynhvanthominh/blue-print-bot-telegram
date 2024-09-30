@@ -55,7 +55,7 @@ bot.on("message", async (ctx) => {
       ctx.sendMessage("Login success");
       start(ctx);
     } catch (error) {
-      ctx.sendMessage("Login failed");
+      ctx.sendMessage("Login failed", error);
     }
   }
 });

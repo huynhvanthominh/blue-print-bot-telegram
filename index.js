@@ -76,3 +76,5 @@ const stop = (ctx) => {
   _stop(chatId);
   ctx.sendMessage("Stop auto punch success.");
 };
+
+console.log("Running...");

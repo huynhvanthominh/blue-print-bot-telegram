@@ -1,6 +1,13 @@
 const { Telegraf } = require("telegraf");
 
-const { login, getUserInfo, _start, init, _stop } = require("./modules/auth");
+const {
+  login,
+  getUserInfo,
+  _start,
+  init,
+  _stop,
+  logout,
+} = require("./modules/auth");
 
 const token = "7419413997:AAEcqfdMPytFfxkDchJxSmW3dzimTozrSo4";
 const bot = new Telegraf(token);
@@ -15,6 +22,7 @@ bot.start(async (ctx) => {
     ctx.sendMessage(JSON.stringify(user));
     start(ctx);
   } catch (e) {
+    await logout(chatId);
     ctx.sendMessage("Please enter your username:");
     userInputs[chatId].state = "awaiting_username";
   }

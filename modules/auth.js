@@ -178,13 +178,12 @@ async function login(ctx, username, password) {
 }
 
 // Logout function
-function logout() {
-  if (fs.existsSync(cookiePath)) {
-    fs.unlinkSync(cookiePath);
-    console.log("Logged out");
-  } else {
-    console.log("Already logged out");
-  }
+async function logout(chatId) {
+  await authClient.get(homePage + "process-logout", {
+    headers: {
+      "chat-id": chatId,
+    },
+  });
 }
 
 // Fetch user info

@@ -268,6 +268,7 @@ const _stop = (chatId) => {
 
 const init = async (bot) => {
   const files = fs.readdirSync(cookiesDir);
+  console.log(files);
   files.forEach((file) => {
     const chatId = file.split(".")[0];
     userInputs[chatId] = {};

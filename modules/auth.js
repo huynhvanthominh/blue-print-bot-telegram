@@ -243,15 +243,15 @@ const _start = (chatId, { onSuccess, onPunchSuccess, onError }) => {
   const job1 = CronJob.from({
     cronTime: "00 00 07 * * 1-5",
     onTick: function () {
-      _main(1, 30).then();
+      _main(1, 5).then();
     },
     start: true,
   });
 
   const job3 = CronJob.from({
-    cronTime: "00 00 12 * * 1-5",
+    cronTime: "00 00 13 * * 1-5",
     onTick: function () {
-      _main(1, 30).then();
+      _main(1, 5).then();
     },
     start: true,
   });

@@ -184,6 +184,10 @@ async function logout(chatId) {
       "chat-id": chatId,
     },
   });
+  const p = path.join(cookiesDir, `${chatId}.json`);
+  if (fs.existsSync(p)) {
+    fs.rmSync(p);
+  }
 }
 
 // Fetch user info
@@ -230,6 +234,8 @@ const _start = (chatId, { onSuccess, onPunchSuccess, onError }) => {
   const _main = async (min, max) => {
     await getUserInfo(chatId);
     const randomDelay = getRandomDelay(min, max);
+    const date = new Date();
+    date.setMilliseconds(date.getMilliseconds() + randomDelay);
     setTimeout(() => {
       punch(chatId)
         .then((rs) => {
@@ -239,17 +245,13 @@ const _start = (chatId, { onSuccess, onPunchSuccess, onError }) => {
           onError && onError(err);
         });
     }, randomDelay);
+    onSuccess &&
+      onSuccess({
+        date: date.toLocaleString(),
+      });
   };
   const job1 = CronJob.from({
     cronTime: "00 00 07 * * 1-5",
-    onTick: function () {
-      _main(1, 5).then();
-    },
-    start: true,
-  });
-
-  const job3 = CronJob.from({
-    cronTime: "00 30 13 * * 1-5",
     onTick: function () {
       _main(1, 5).then();
     },
@@ -263,18 +265,18 @@ const _start = (chatId, { onSuccess, onPunchSuccess, onError }) => {
     },
     start: true,
   });
-  job1.start();
-  job2.start();
-  userInputs[chatId].job1 = job1;
-  userInputs[chatId].job2 = job2;
-  userInputs[chatId].job3 = job3;
-  onSuccess && onSuccess();
+
+  const jobs = [job1, job2];
+  jobs.forEach((job) => {
+    job.start();
+  });
+  userInputs[chatId].jobs = jobs;
 };
 
 const _stop = (chatId) => {
-  userInputs[chatId]?.job1?.stop();
-  userInputs[chatId]?.job2?.stop();
-  userInputs[chatId]?.job3?.stop();
+  userInputs[chatId]?.jobs?.forEach((job) => {
+    job?.stop();
+  });
 };
 
 const init = async (bot) => {
@@ -283,10 +285,12 @@ const init = async (bot) => {
     const chatId = file.split(".")[0];
     userInputs[chatId] = {};
     _start(chatId, {
-      onSuccess: () => {
-        _botSendMessage(bot, chatId, "Restart cronjob auto punch success.");
+      onSuccess: ({ date }) => {
+        _botSendMessage(bot, chatId, "Will auto punch at " + date);
       },
-      onPunchSuccess: () => {},
+      onPunchSuccess: () => {
+        _botSendMessage(bot, chatId, "Punch success.");
+      },
       onError: (err) =>
         _botSendMessage(
           bot,
@@ -294,6 +298,7 @@ const init = async (bot) => {
           "Restart auto punch failed. Information: " + err,
         ),
     });
+    _botSendMessage(bot, chatId, "Bot restarted");
   });
 };
 

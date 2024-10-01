@@ -28,6 +28,7 @@ bot.start(async (ctx) => {
   }
 });
 bot.command("stop", (ctx) => stop(ctx));
+bot.command("logout", (ctx) => logout(ctx.chat.id));
 bot.help((ctx) => ctx.reply("Send me a sticker"));
 
 bot.on("message", async (ctx) => {
@@ -67,6 +68,7 @@ bot.launch(() => {
 const start = (ctx) => {
   const chatId = ctx.chat.id;
   _start(chatId, {
+    onSuccess: ({ date }) => ctx.sendMessage("Will auto punch at " + date),
     onPunchSuccess: () => {
       ctx.sendMessage("Punch success.");
     },
@@ -79,8 +81,6 @@ const start = (ctx) => {
 
 const stop = (ctx) => {
   const chatId = ctx.chat.id;
-  userInputs[chatId]?.job1?.stop();
-  userInputs[chatId]?.job2?.stop();
   _stop(chatId);
   ctx.sendMessage("Stop auto punch success.");
 };

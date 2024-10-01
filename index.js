@@ -11,7 +11,7 @@ const {
 
 const token = "7419413997:AAEcqfdMPytFfxkDchJxSmW3dzimTozrSo4";
 const bot = new Telegraf(token);
-const users = ["minhhvt"];
+const users = ["minhhvt", "trungha"];
 let userInputs = {};
 
 bot.start(async (ctx) => {

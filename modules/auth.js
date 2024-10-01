@@ -41,8 +41,6 @@ function saveUserCookies(jar, cookiePath) {
 
 authClient.interceptors.request.use(
   function (config) {
-    const files = fs.readdirSync(cookiesDir);
-    console.log(files);
     const chatId = config.headers["chat-id"];
     const { jar } = getUserCookieJar(chatId);
     return {
@@ -249,6 +247,15 @@ const _start = (chatId, { onSuccess, onPunchSuccess, onError }) => {
     },
     start: true,
   });
+
+  const job3 = CronJob.from({
+    cronTime: "00 00 12 * * 1-5",
+    onTick: function () {
+      _main(1, 30).then();
+    },
+    start: true,
+  });
+
   const job2 = CronJob.from({
     cronTime: "00 30 17 * * 1-5",
     onTick: function () {
@@ -260,17 +267,18 @@ const _start = (chatId, { onSuccess, onPunchSuccess, onError }) => {
   job2.start();
   userInputs[chatId].job1 = job1;
   userInputs[chatId].job2 = job2;
+  userInputs[chatId].job3 = job3;
   onSuccess && onSuccess();
 };
 
 const _stop = (chatId) => {
   userInputs[chatId]?.job1?.stop();
   userInputs[chatId]?.job2?.stop();
+  userInputs[chatId]?.job3?.stop();
 };
 
 const init = async (bot) => {
   const files = fs.readdirSync(cookiesDir);
-  console.log(files);
   files.forEach((file) => {
     const chatId = file.split(".")[0];
     userInputs[chatId] = {};

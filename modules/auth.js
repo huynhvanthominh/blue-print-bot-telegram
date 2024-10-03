@@ -192,22 +192,26 @@ async function logout(chatId) {
 
 // Fetch user info
 async function getUserInfo(chatId) {
-  const response = await authClient.get(
-    "https://blueprint.cyberlogitec.com.vn/api/getUserInfo",
-    {
-      headers: {
-        "User-Agent":
-          "Mozilla/5.0 (X11; Linux x86_64; rv:126.0) Gecko/20100101 Firefox/126.0",
-        Accept: "application/json, text/plain, */*",
-        "chat-id": chatId,
+  try {
+    const response = await authClient.get(
+      "https://blueprint.cyberlogitec.com.vn/api/getUserInfo",
+      {
+        headers: {
+          "User-Agent":
+            "Mozilla/5.0 (X11; Linux x86_64; rv:126.0) Gecko/20100101 Firefox/126.0",
+          Accept: "application/json, text/plain, */*",
+          "chat-id": chatId,
+        },
       },
-    },
-  );
+    );
 
-  if (response.status !== 200) {
+    if (response.status !== 200) {
+      throw new Error("Error fetching user info");
+    }
+    return response.data;
+  } catch (err) {
     throw new Error("Error fetching user info");
   }
-  return response.data;
 }
 
 const punch = async (chatId) => {
@@ -225,7 +229,6 @@ const punch = async (chatId) => {
 function getRandomDelay(minMinutes, maxMinutes) {
   const minMs = minMinutes * 60 * 1000;
   const maxMs = maxMinutes * 60 * 1000;
-
   return Math.floor(Math.random() * (maxMs - minMs + 1)) + minMs;
 }
 

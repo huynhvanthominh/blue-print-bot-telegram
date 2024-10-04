@@ -255,7 +255,7 @@ const _start = (chatId, { onSuccess, onPunchSuccess, onError }) => {
           date: date.toLocaleString(),
         });
     } catch (error) {
-      onError && onError(err);
+      onError && onError(error);
     }
   };
   const job1 = CronJob.from({

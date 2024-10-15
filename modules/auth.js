@@ -61,7 +61,6 @@ authClient.interceptors.response.use(
     const jar = response.config.jar;
     const { cookiePath } = getUserCookieJar(chatId);
     saveUserCookies(jar, cookiePath);
-    fs.wri;
     return response;
   },
   (error) => {

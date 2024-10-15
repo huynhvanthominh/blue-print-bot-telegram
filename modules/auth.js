@@ -269,12 +269,19 @@ const _start = (chatId, { onSuccess, onPunchSuccess, onError }) => {
   const job2 = CronJob.from({
     cronTime: "00 30 17 * * 1-5",
     onTick: function () {
-      _main(1, 10).then();
+      _main(1, 5).then();
+    },
+    start: true,
+  });
+  const job3 = CronJob.from({
+    cronTime: "00 15 18 * * 1-5",
+    onTick: function () {
+      _main(1, 5).then();
     },
     start: true,
   });
 
-  const jobs = [job1, job2];
+  const jobs = [job1, job2, job3];
   jobs.forEach((job) => {
     job.start();
   });
@@ -289,6 +296,7 @@ const _stop = (chatId) => {
 
 const init = async (bot) => {
   const files = fs.readdirSync(cookiesDir);
+  console.log(files);
   files.forEach((file) => {
     const chatId = file.split(".")[0];
     userInputs[chatId] = {};

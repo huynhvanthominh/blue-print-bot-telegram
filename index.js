@@ -9,7 +9,7 @@ const {
   logout,
 } = require("./modules/auth");
 
-const token = "7419413997:AAEcqfdMPytFfxkDchJxSmW3dzimTozrSo4";
+const token ="7419413997:AAEOiZNONlrq1KsoYq9vXtZxhEgnHZ-bxnY"
 const bot = new Telegraf(token);
 const users = ["minhhvt", "trungha"];
 let userInputs = {};
